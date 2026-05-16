@@ -447,7 +447,7 @@ export default function App() {
       <CursorLabel label={cursorLabel} x={cursorPos.x} y={cursorPos.y} />
       <ArtOverlay visible={actionComplete === 'art'} />
       <ProjectsOverlay visible={actionComplete === 'projects' || actionComplete === 'aboutme_project'} />
-      <AboutMeOverlay visible={actionComplete === 'aboutme'} />
+      <AboutMeOverlay visible={actionComplete === 'aboutme' && activeAction !== 'aboutme_project'} />
       <div className="canvas-container" ref={canvasContainerRef}>
         <Canvas
           shadows

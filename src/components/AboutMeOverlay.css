@@ -1,77 +1,101 @@
-/* ── About Me Overlay Styles ── */
+@import url('https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap');
+
 .aboutme-overlay {
   position: fixed;
   inset: 0;
   z-index: 80;
   pointer-events: none;
+  /* anchored to top-left, 60% margin from left */
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: flex-end;
-  padding-right: 40%;
+  padding: 60px 40px 0 60%;
 }
 
 .aboutme-card {
-  width: 500px;
-  max-width: 90vw;
-  padding: 40px;
-  background: rgba(12, 12, 22, 0.85);
-  border: 2px solid rgba(124, 92, 252, 0.3);
-  border-radius: 16px;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.5),
-    0 0 0 1px rgba(124, 92, 252, 0.1) inset;
+  background: transparent;
   pointer-events: auto;
-  animation: aboutMeCardFadeIn 0.8s ease-out;
+  width: 100%;
 }
 
-@keyframes aboutMeCardFadeIn {
-  from {
-    opacity: 0;
-    transform: translateX(50px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+/* ── NAME — biggest, bold ── */
+.aboutme-name {
+  font-family: 'Courier Prime', monospace;
+  font-size: 48px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 28px;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+  text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
 }
 
-.aboutme-label {
-  display: inline-block;
-  font-size: 10px;
+/* ── INFO ROWS ── */
+.aboutme-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.aboutme-row {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.aboutme-row-label {
+  font-family: 'Courier Prime', monospace;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: var(--accent-glow);
-  margin-bottom: 20px;
-  padding: 4px 12px;
-  background: rgba(124, 92, 252, 0.15);
-  border-radius: 6px;
+  color: #fff;
+  opacity: 0.4;
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
 }
 
-.aboutme-text {
-  font-family: 'Courier New', monospace;
+.aboutme-row-value {
+  font-family: 'Courier Prime', monospace;
+  font-size: 18px;
+  font-weight: 400;
+  color: #fff;
+  line-height: 1.3;
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+}
+
+/* ── DIVIDER ── */
+.aboutme-divider {
+  width: 32px;
+  height: 2px;
+  background: #fff;
+  margin-bottom: 22px;
+  box-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+}
+
+/* ── BIO ── */
+.aboutme-bio {
+  font-family: 'Courier Prime', monospace;
   font-size: 16px;
+  font-style: italic;
   line-height: 1.8;
-  color: var(--text-primary);
+  color: #fff;
   white-space: pre-wrap;
-  word-wrap: break-word;
   margin: 0;
+  opacity: 0.75;
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
 }
 
+/* ── CURSOR ── */
 .aboutme-cursor {
-  display: inline-block;
-  width: 2px;
-  background: var(--accent-glow);
-  animation: cursorBlink 1s step-end infinite;
+  display: inline;
+  color: #fff;
+  font-style: normal;
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+  animation: blink 1s step-end infinite;
 }
 
-@keyframes cursorBlink {
-  0%, 50% {
-    opacity: 1;
-  }
-  51%, 100% {
-    opacity: 0;
-  }
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
 }

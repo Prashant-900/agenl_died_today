@@ -1,4 +1,5 @@
-/* ── Projects Overlay Styles ── */
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Courier+Prime:wght@400;700&display=swap');
+
 .projects-overlay {
   position: fixed;
   inset: 0;
@@ -6,181 +7,183 @@
   pointer-events: none;
   display: flex;
   align-items: center;
-  justify-content: center;
+  padding-top: 20vh;
+  padding-left: 120px;
+  padding-right: 60px;
 }
 
-/* Transparent container with 40% gap from top */
-.projects-container {
-  position: absolute;
-  top: 40%;
-  left: 50%;
-  transform: translate(-50%, 0);
-  width: 85vw;
-  max-width: 1200px;
-  height: calc(60vh - 40px);
-  background: rgba(12, 12, 22, 0.4);
-  border: 1px solid rgba(124, 92, 252, 0.2);
-  border-radius: 20px;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  padding: 24px;
-  pointer-events: auto;
-  animation: projectsContainerFadeIn 0.8s ease-out;
-  overflow: hidden;
+.projects-scroll-track {
   position: relative;
+  width: 100%;
+  pointer-events: auto;
 }
 
-@keyframes projectsContainerFadeIn {
-  from {
-    opacity: 0;
-    transform: translate(-50%, 20px);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, 0);
-  }
-}
-
-/* Horizontal scrollable cards */
 .projects-scroll {
   display: flex;
   gap: 20px;
-  height: 100%;
+  padding: 16px 0;
   overflow-x: auto;
-  overflow-y: hidden;
-  padding: 8px;
+  overflow-y: visible;
   scroll-behavior: smooth;
-  
-  /* Fade effect on edges */
-  mask-image: linear-gradient(
-    to right,
-    transparent 0%,
-    black 5%,
-    black 95%,
-    transparent 100%
-  );
-  -webkit-mask-image: linear-gradient(
-    to right,
-    transparent 0%,
-    black 5%,
-    black 95%,
-    transparent 100%
-  );
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #5c0000 transparent;
 }
 
-.projects-scroll::-webkit-scrollbar {
-  height: 8px;
-}
+.projects-scroll::-webkit-scrollbar { height: 3px; }
+.projects-scroll::-webkit-scrollbar-track { background: transparent; }
+.projects-scroll::-webkit-scrollbar-thumb { background: #5c0000; }
 
-.projects-scroll::-webkit-scrollbar-track {
-  background: rgba(124, 92, 252, 0.1);
-  border-radius: 4px;
-}
-
-.projects-scroll::-webkit-scrollbar-thumb {
-  background: rgba(124, 92, 252, 0.4);
-  border-radius: 4px;
-}
-
-.projects-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(124, 92, 252, 0.6);
-}
-
-/* Project card */
+/* ── Card ── */
 .project-card {
-  flex: 0 0 320px;
-  height: 100%;
+  flex: 0 0 260px;
+  min-height: 240px;
   display: flex;
   flex-direction: column;
-  padding: 24px;
-  background: rgba(15, 15, 25, 0.8);
-  border: 1px solid rgba(124, 92, 252, 0.25);
-  border-radius: 16px;
+  padding: 20px 18px 16px;
+  background: #0d0d0d;
+  border: 1.5px solid #2a0000;
+  border-radius: 0;
   text-decoration: none;
-  color: var(--text-primary);
-  transition: all 0.3s ease;
-  animation: projectCardFadeIn 0.6s ease-out both;
+  color: #c8c8b4;
+  font-family: 'Share Tech Mono', monospace;
   cursor: pointer;
+  pointer-events: auto;
+  position: relative;
+  overflow: hidden;
+  animation: cardSlashIn 0.4s ease-out both;
+  transition: border-color 0.15s, background 0.15s;
 }
 
-@keyframes projectCardFadeIn {
+.project-card::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 0; height: 0;
+  border-style: solid;
+  border-width: 0 26px 26px 0;
+  border-color: transparent #5c0000 transparent transparent;
+  transition: border-color 0.15s;
+}
+
+.project-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 18px;
+  width: 1px; height: 0;
+  background: #5c0000;
+  transition: height 0.35s ease;
+}
+
+.project-card:hover { background: #110000; border-color: #8b0000; }
+.project-card:hover::before { border-color: transparent #8b0000 transparent transparent; }
+.project-card:hover::after  { height: 100%; }
+
+.project-card:hover .project-name {
+  animation: glitch 0.25s steps(2) infinite;
+}
+
+@keyframes glitch {
+  0%   { text-shadow: -2px 0 #8b0000, 2px 0 #004040; clip-path: inset(0 0 60% 0); }
+  25%  { text-shadow:  2px 0 #8b0000,-2px 0 #004040; clip-path: inset(40% 0 0 0); }
+  50%  { text-shadow: -1px 0 #8b0000;                clip-path: inset(20% 0 30% 0); }
+  75%  { text-shadow:  1px 0 #004040;                clip-path: inset(0 0 80% 0); }
+  100% { text-shadow: none;                          clip-path: none; }
+}
+
+@keyframes cardSlashIn {
   from {
     opacity: 0;
-    transform: translateY(20px) scale(0.95);
+    transform: translateY(24px) skewY(2deg);
+    clip-path: inset(0 100% 0 0);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0) skewY(0deg);
+    clip-path: inset(0 0% 0 0);
   }
-}
-
-.project-card:hover {
-  transform: translateY(-8px);
-  border-color: rgba(124, 92, 252, 0.5);
-  box-shadow: 0 12px 40px rgba(124, 92, 252, 0.3);
-  background: rgba(15, 15, 25, 0.95);
 }
 
 .project-card-top {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 12px;
 }
 
-.project-icon {
-  font-size: 24px;
-  filter: drop-shadow(0 0 8px rgba(124, 92, 252, 0.5));
+.project-index {
+  font-size: 11px;
+  font-family: 'Share Tech Mono', monospace;
+  color: #5c0000;
+  min-width: 20px;
+  padding-top: 3px;
+  letter-spacing: 1px;
 }
 
 .project-name {
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 700;
-  color: var(--text-primary);
-  word-break: break-word;
+  font-family: 'Courier Prime', monospace;
+  color: #e8e0cc;
+  word-break: break-all;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1.3;
 }
 
 .project-desc {
   flex: 1;
-  font-size: 14px;
-  line-height: 1.6;
-  color: var(--text-muted);
-  margin-bottom: 16px;
+  font-size: 11px;
+  line-height: 1.7;
+  color: #7a7a68;
+  margin: 0 0 14px;
+  font-family: 'Share Tech Mono', monospace;
+  border-left: 2px solid #1a0000;
+  padding-left: 10px;
 }
 
 .project-card-bottom {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding-top: 16px;
-  border-top: 1px solid rgba(124, 92, 252, 0.15);
-  font-size: 12px;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid #1e0000;
+  font-size: 11px;
+  margin-top: auto;
 }
 
 .project-lang {
-  padding: 4px 10px;
-  background: rgba(124, 92, 252, 0.2);
-  border-radius: 6px;
-  color: var(--accent-glow);
-  font-weight: 600;
+  padding: 2px 8px;
+  background: #1a0000;
+  border: 1px solid #3d0000;
+  border-radius: 0;
+  color: #8b0000;
+  font-family: 'Share Tech Mono', monospace;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
 }
 
 .project-website {
-  color: var(--text-muted);
-  font-size: 11px;
+  color: #4a4a3c;
+  font-size: 10px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 150px;
+  max-width: 110px;
+  font-family: 'Share Tech Mono', monospace;
 }
 
 .project-arrow {
   margin-left: auto;
-  font-size: 18px;
-  color: var(--accent-primary);
-  transition: transform 0.3s ease;
+  font-size: 14px;
+  color: #3d0000;
+  font-family: 'Share Tech Mono', monospace;
+  letter-spacing: -2px;
+  transition: color 0.15s, letter-spacing 0.15s;
 }
 
 .project-card:hover .project-arrow {
-  transform: translateX(4px);
+  color: #8b0000;
+  letter-spacing: 2px;
 }
