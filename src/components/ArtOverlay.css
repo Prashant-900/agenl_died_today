@@ -1,0 +1,288 @@
+/* ── Art Overlay root ── */
+.art-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  pointer-events: none;
+}
+
+/*
+  LAYOUT HIERARCHY
+  ─────────────────────────────────────────────────────
+  .art-frame          outer boundary — left edge to 60% of screen
+    .art-l-bl         L-shape  at frame BOTTOM-LEFT  (slides from left)
+    .art-l-tr         L-shape  at frame TOP-RIGHT     (slides from right)
+    .art-inner        inner container — holds the card, padded inward by box size
+      .art-card       fixed-size card, transparent
+  ─────────────────────────────────────────────────────
+
+  L SHAPE EXPLANATION (bottom-left):
+    A real "L" letter:
+      [ A ]             ← tall vertical part (left column)
+      [ B ]
+      [ B ][ C ]        ← horizontal foot goes right
+
+    With 3 equal 60×60 boxes:
+      [box-a]           top of vertical bar
+      [box-b][box-c]    foot: box-b continues vertical, box-c extends right
+
+  MIRRORED L (top-right) = Γ shape:
+      [box-d][box-e]    top: box-d extends left, box-e starts vertical
+             [box-f]    box-f continues vertical bar downward
+*/
+
+/* ─────────────────────────────────────────
+   OUTER FRAME
+   Takes full height of screen.
+   Width = screen width − 50% margin-right − left offset.
+───────────────────────────────────────── */
+.art-frame {
+  position: absolute;
+  top: 40px;
+  bottom: 40px;
+  left: 20px;
+  right: 50%;
+  /* grow from top-left of frame */
+  transform-origin: top left;
+  animation: growFromTopLeft 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.05s both;
+  pointer-events: auto;
+}
+
+@keyframes growFromTopLeft {
+  from { transform: scale(0); }
+  to   { transform: scale(1); }
+}
+
+/* ─────────────────────────────────────────
+   SHARED BOX BASE
+───────────────────────────────────────── */
+.art-box {
+  width: 40px;
+  height: 40px;
+  border: 2px solid #000;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+/* ─────────────────────────────────────────
+   BOTTOM-LEFT L  (L shape)
+
+   Column layout:
+     row-top:    [ box-a ]
+     row-foot:   [ box-b ][ box-c ]
+
+   box-a: top of vertical bar  (left-aligned)
+   box-b: bottom of vertical / left of foot
+   box-c: right extension of foot
+───────────────────────────────────────── */
+.art-l-bl {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  width: 80px;
+  animation: slideFromLeft 0.32s ease-out both;
+  overflow: visible;
+}
+
+.art-l-bl .row-top {
+  display: flex;
+}
+
+.art-l-bl .row-foot {
+  display: flex;
+}
+
+.art-l-bl .box-a {
+  background: #8ab5b0;        /* teal — vertical top */
+  border-bottom: none;        /* shares border with box-b */
+}
+
+.art-l-bl .box-b {
+  background: #8ab5b0;        /* teal — vertical bottom / foot-left */
+  border-right: none;         /* shares border with box-c */
+}
+
+.art-l-bl .box-c {
+  background: #c9a96e;        /* amber — foot right */
+}
+
+@keyframes slideFromLeft {
+  from { transform: translateX(-120px); }
+  to   { transform: translateX(0); }
+}
+
+/* ─────────────────────────────────────────
+   TOP-RIGHT L  (mirrored → Γ shape)
+
+   Column layout:
+     row-head:  [ box-d ][ box-e ]
+     row-bot:            [ box-f ]
+
+   box-d: left extension of head
+   box-e: top of vertical bar / right of head
+   box-f: bottom of vertical bar  (right-aligned)
+───────────────────────────────────────── */
+.art-l-tr {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  width: 80px;
+  animation: slideFromRight 0.32s ease-out 0.08s both;
+  overflow: visible;
+}
+
+.art-l-tr .row-head {
+  display: flex;
+}
+
+.art-l-tr .row-bot {
+  display: flex;
+}
+
+.art-l-tr .box-d {
+  background: #c9a96e;        /* amber — head left extension */
+  border-right: none;
+}
+
+.art-l-tr .box-e {
+  background: #b09abf;        /* purple — vertical top / head right */
+  border-bottom: none;
+}
+
+.art-l-tr .box-f {
+  background: #b09abf;        /* purple — vertical bottom */
+}
+
+@keyframes slideFromRight {
+  from { transform: translateX(120px); }
+  to   { transform: translateX(0); }
+}
+
+/* ─────────────────────────────────────────
+   INNER CONTAINER
+   Padded inward by 60px on all sides so the
+   card content sits clear of both L-shapes.
+   The boxes live outside this container but
+   inside .art-frame, sandwiched between them.
+   Vertically centers the card.
+───────────────────────────────────────── */
+.art-inner {
+  padding: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ─────────────────────────────────────────
+   SCROLLABLE CARDS CONTAINER
+───────────────────────────────────────── */
+.art-cards-scroll {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  padding: 20px 0;
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+.art-cards-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.art-cards-scroll::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.art-cards-scroll::-webkit-scrollbar-thumb {
+  background: rgba(138, 181, 176, 0.6);
+  border-radius: 4px;
+}
+
+.art-cards-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(138, 181, 176, 0.8);
+}
+
+/* ─────────────────────────────────────────
+   CARD — fixed size, transparent background
+───────────────────────────────────────── */
+.art-card {
+  width: 260px;
+  background: transparent;
+  flex-shrink: 0;
+  opacity: 0;
+  animation: artCardFadeIn 0.6s ease-out forwards;
+}
+
+@keyframes artCardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.art-card-image {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  display: block;
+  background: #1e1a2e;        /* placeholder tint */
+}
+
+.art-card-body {
+  padding: 10px 0 0;
+  background: transparent;
+}
+
+.art-card-title {
+  font-size: 18px;
+  font-weight: 800;
+  margin: 0 0 5px;
+  color: #fff;
+  line-height: 1.2;
+  text-shadow:
+    -2px -2px 0 #000,
+     2px -2px 0 #000,
+    -2px  2px 0 #000,
+     2px  2px 0 #000;
+}
+
+.art-card-desc {
+  font-size: 12px;
+  line-height: 1.6;
+  color: #fff;
+  margin: 0 0 8px;
+  text-shadow:
+    -1px -1px 0 #000,
+     1px -1px 0 #000,
+    -1px  1px 0 #000,
+     1px  1px 0 #000;
+}
+
+.art-card-meta {
+  display: flex;
+  gap: 10px;
+  font-size: 11px;
+  color: #fff;
+  text-shadow:
+    -1px -1px 0 #000,
+     1px -1px 0 #000,
+    -1px  1px 0 #000,
+     1px  1px 0 #000;
+}

@@ -1,0 +1,993 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg-dark: #0a0a0f;
+  --accent-primary: #7c5cfc;
+  --accent-glow: #a78bfa;
+  --text-primary: #f0eef6;
+  --text-muted: #8b85a0;
+  --glass-bg: rgba(15, 15, 25, 0.65);
+  --glass-border: rgba(124, 92, 252, 0.15);
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg-dark);
+  font-family: 'Inter', sans-serif;
+  color: var(--text-primary);
+}
+
+/* Loading screen — black bg with centered TV static strip */
+.loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000000;
+  transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+
+.loading-screen.fade-out {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.loading-noise-strip {
+  width: min(40vw, 200px);
+  height: 30px;
+  image-rendering: pixelated;
+}
+
+/* Full-screen glitch transition overlay */
+.glitch-transition {
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+  width: 100%;
+  height: 100%;
+}
+
+/* HUD overlay */
+.hud-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.hud-top {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 24px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  animation: slideDown 0.6s ease-out 0.5s both;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hud-title {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, var(--accent-glow), var(--accent-primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hud-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 8px rgba(74, 222, 128, 0.6);
+  animation: blink 2s ease-in-out infinite;
+}
+
+@keyframes blink {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* Fan hover tooltip */
+.fan-tooltip {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  z-index: 20;
+  padding: 8px 18px;
+  background: rgba(124, 92, 252, 0.2);
+  border: 1px solid rgba(124, 92, 252, 0.35);
+  border-radius: 8px;
+  backdrop-filter: blur(12px);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--accent-glow);
+  letter-spacing: 0.5px;
+  animation: fadeIn 0.3s ease;
+  pointer-events: none;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Canvas */
+.canvas-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.canvas-container canvas {
+  display: block;
+}
+
+/* Ensure canvas doesn't steal pointer events from panels */
+.canvas-container {
+  z-index: 1;
+}
+
+/* ── Drag handle for panels ── */
+.drag-handle {
+  cursor: grab;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.drag-grip {
+  margin-left: auto;
+  font-size: 10px;
+  color: var(--text-muted);
+  opacity: 0.4;
+  letter-spacing: 2px;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: opacity 0.2s ease;
+}
+
+.drag-handle:hover .drag-grip {
+  opacity: 0.8;
+}
+
+/* Lights panel header for drag */
+.lights-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 16px 2px;
+}
+
+/* ── Fan Control Panel ── */
+.fan-panel {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 50;
+  width: 240px;
+  padding: 0;
+  background: rgba(12, 12, 22, 0.75);
+  border: 1px solid rgba(124, 92, 252, 0.2);
+  border-radius: 16px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(124, 92, 252, 0.08) inset,
+    0 1px 0 rgba(255, 255, 255, 0.04) inset;
+  animation: panelSlideUp 0.5s ease-out 0.8s both;
+  overflow: hidden;
+}
+
+@keyframes panelSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.fan-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid rgba(124, 92, 252, 0.1);
+}
+
+.fan-panel-icon {
+  font-size: 16px;
+  filter: drop-shadow(0 0 4px rgba(124, 92, 252, 0.5));
+  animation: iconSpin 3s linear infinite;
+}
+
+@keyframes iconSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.fan-panel-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, var(--accent-glow), var(--accent-primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.fan-panel-section {
+  padding: 12px 16px;
+}
+
+.fan-panel-section+.fan-panel-section {
+  padding-top: 0;
+}
+
+.fan-panel-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.fan-panel-value {
+  font-variant-numeric: tabular-nums;
+  color: var(--accent-glow);
+  font-size: 12px;
+  font-weight: 700;
+  min-width: 32px;
+  text-align: right;
+}
+
+/* Axis buttons */
+.fan-axis-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.fan-axis-btn {
+  flex: 1;
+  padding: 8px 0;
+  border: 1px solid rgba(124, 92, 252, 0.15);
+  border-radius: 8px;
+  background: rgba(124, 92, 252, 0.06);
+  color: var(--text-muted);
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.fan-axis-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-glow));
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.fan-axis-btn:hover {
+  border-color: rgba(124, 92, 252, 0.35);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+}
+
+.fan-axis-btn.active {
+  border-color: var(--accent-primary);
+  color: #fff;
+  box-shadow:
+    0 0 12px rgba(124, 92, 252, 0.3),
+    0 0 0 1px rgba(124, 92, 252, 0.4) inset;
+}
+
+.fan-axis-btn.active::before {
+  opacity: 0.2;
+}
+
+/* Speed slider */
+.fan-speed-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(124, 92, 252, 0.12);
+  outline: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.fan-speed-slider:hover {
+  background: rgba(124, 92, 252, 0.2);
+}
+
+.fan-speed-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-glow));
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 10px rgba(124, 92, 252, 0.4);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.fan-speed-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 16px rgba(124, 92, 252, 0.6);
+}
+
+.fan-speed-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-glow));
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 10px rgba(124, 92, 252, 0.4);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.fan-speed-slider::-moz-range-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 16px rgba(124, 92, 252, 0.6);
+}
+
+/* ── Animation Panel ── */
+.anim-panel {
+  position: fixed;
+  bottom: 200px;
+  right: 24px;
+  z-index: 50;
+  width: 240px;
+  background: rgba(12, 12, 22, 0.75);
+  border: 1px solid rgba(124, 92, 252, 0.2);
+  border-radius: 16px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(124, 92, 252, 0.08) inset,
+    0 1px 0 rgba(255, 255, 255, 0.04) inset;
+  animation: panelSlideUp 0.5s ease-out 1s both;
+  overflow: hidden;
+}
+
+.anim-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid rgba(124, 92, 252, 0.1);
+}
+
+.anim-panel-icon {
+  font-size: 16px;
+  filter: drop-shadow(0 0 4px rgba(124, 92, 252, 0.5));
+}
+
+.anim-panel-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, var(--accent-glow), var(--accent-primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.anim-panel-body {
+  padding: 12px 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Button grid — 3 action buttons in a row */
+.anim-btn-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+
+.anim-play-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 10px 4px;
+  border: 1px solid rgba(124, 92, 252, 0.2);
+  border-radius: 10px;
+  background: rgba(124, 92, 252, 0.06);
+  color: var(--text-muted);
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.anim-play-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-glow));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.anim-play-btn:hover {
+  border-color: rgba(124, 92, 252, 0.45);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(124, 92, 252, 0.2);
+}
+
+.anim-play-btn:hover::before {
+  opacity: 0.12;
+}
+
+.anim-play-btn:active {
+  transform: translateY(0) scale(0.96);
+}
+
+/* Active action button */
+.anim-play-btn.active {
+  border-color: var(--accent-primary);
+  color: #fff;
+  box-shadow:
+    0 0 16px rgba(124, 92, 252, 0.35),
+    0 0 0 1px rgba(124, 92, 252, 0.5) inset;
+}
+
+.anim-play-btn.active::before {
+  opacity: 0.25;
+}
+
+.anim-play-icon {
+  position: relative;
+  z-index: 1;
+  font-size: 16px;
+  filter: drop-shadow(0 0 3px rgba(124, 92, 252, 0.4));
+  transition: filter 0.3s ease;
+}
+
+.anim-play-btn.active .anim-play-icon {
+  filter: drop-shadow(0 0 6px rgba(124, 92, 252, 0.8));
+}
+
+/* Reset button */
+.anim-reset-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 0;
+  border: 1px solid rgba(255, 100, 100, 0.15);
+  border-radius: 8px;
+  background: rgba(255, 100, 100, 0.05);
+  color: rgba(255, 140, 140, 0.7);
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.anim-reset-btn:hover:not(:disabled) {
+  border-color: rgba(255, 100, 100, 0.4);
+  color: #ff8c8c;
+  background: rgba(255, 100, 100, 0.1);
+  box-shadow: 0 2px 12px rgba(255, 100, 100, 0.15);
+}
+
+.anim-reset-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.anim-reset-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.anim-reset-icon {
+  font-size: 14px;
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+.anim-reset-btn:hover:not(:disabled) .anim-reset-icon {
+  transform: rotate(-180deg);
+}
+
+/* ── Wakeup Button (in animation panel) ── */
+.anim-wakeup-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 0;
+  border: 1px solid rgba(255, 180, 50, 0.3);
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(255, 180, 50, 0.1), rgba(255, 120, 20, 0.08));
+  color: #ffb844;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.anim-wakeup-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 180, 50, 0.2), rgba(255, 120, 20, 0.15));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.anim-wakeup-btn:hover {
+  border-color: rgba(255, 180, 50, 0.6);
+  color: #ffc965;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(255, 160, 30, 0.25);
+}
+
+.anim-wakeup-btn:hover::before {
+  opacity: 1;
+}
+
+.anim-wakeup-btn:active {
+  transform: translateY(0) scale(0.97);
+}
+
+/* ── Lights Toggle Panel ── */
+.lights-panel {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  z-index: 50;
+  animation: panelSlideUp 0.5s ease-out 1.2s both;
+}
+
+.lights-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 22px;
+  border-radius: 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.35s ease;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.lights-toggle-btn.on {
+  background: rgba(74, 222, 128, 0.1);
+  border: 1px solid rgba(74, 222, 128, 0.3);
+  color: #4ade80;
+  box-shadow: 0 4px 20px rgba(74, 222, 128, 0.15);
+}
+
+.lights-toggle-btn.on:hover {
+  background: rgba(74, 222, 128, 0.18);
+  border-color: rgba(74, 222, 128, 0.5);
+  box-shadow: 0 4px 24px rgba(74, 222, 128, 0.25);
+  transform: translateY(-1px);
+}
+
+.lights-toggle-btn.off {
+  background: rgba(100, 100, 120, 0.15);
+  border: 1px solid rgba(100, 100, 120, 0.3);
+  color: #8888a0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.lights-toggle-btn.off:hover {
+  background: rgba(100, 100, 120, 0.25);
+  border-color: rgba(100, 100, 120, 0.5);
+  color: #aaa;
+  transform: translateY(-1px);
+}
+
+.lights-toggle-icon {
+  font-size: 18px;
+  transition: filter 0.3s ease;
+}
+
+.lights-toggle-btn.on .lights-toggle-icon {
+  filter: drop-shadow(0 0 6px rgba(74, 222, 128, 0.6));
+}
+
+/* ── Fan Speed-Up Button ── */
+.fan-speedup-btn {
+  width: 100%;
+  padding: 10px 0;
+  border: 1px solid rgba(124, 92, 252, 0.25);
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(124, 92, 252, 0.1), rgba(167, 139, 250, 0.06));
+  color: var(--accent-glow);
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.fan-speedup-btn:hover:not(:disabled) {
+  border-color: rgba(124, 92, 252, 0.5);
+  background: linear-gradient(135deg, rgba(124, 92, 252, 0.2), rgba(167, 139, 250, 0.12));
+  box-shadow: 0 2px 16px rgba(124, 92, 252, 0.25);
+  transform: translateY(-1px);
+}
+
+.fan-speedup-btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.97);
+  box-shadow: 0 0 24px rgba(124, 92, 252, 0.4);
+  background: linear-gradient(135deg, rgba(124, 92, 252, 0.3), rgba(167, 139, 250, 0.2));
+}
+
+/* Overloaded state */
+.fan-speedup-btn.overloaded {
+  border-color: rgba(255, 80, 80, 0.4);
+  background: rgba(255, 60, 60, 0.12);
+  color: #ff6b6b;
+  cursor: not-allowed;
+  animation: overloadPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes overloadPulse {
+
+  0%,
+  100% {
+    box-shadow: 0 0 8px rgba(255, 60, 60, 0.2);
+  }
+
+  50% {
+    box-shadow: 0 0 20px rgba(255, 60, 60, 0.4);
+  }
+}
+
+.overload-warning {
+  margin-top: 6px;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #ff6b6b;
+  text-align: center;
+  animation: fadeIn 0.4s ease;
+}
+
+/* ── Lights panel refinement for drag ── */
+.lights-panel {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  z-index: 50;
+  width: 220px;
+  padding: 0;
+  background: rgba(12, 12, 22, 0.75);
+  border: 1px solid rgba(124, 92, 252, 0.15);
+  border-radius: 14px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(124, 92, 252, 0.08) inset,
+    0 1px 0 rgba(255, 255, 255, 0.04) inset;
+  overflow: hidden;
+  animation: panelSlideUp 0.5s ease-out 1.2s both;
+}
+
+.lights-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px 8px;
+  border-bottom: 1px solid rgba(124, 92, 252, 0.1);
+}
+
+.lights-panel-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, var(--accent-glow), var(--accent-primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.lights-panel-body {
+  padding: 10px 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lights-intensity-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.lights-panel .lights-toggle-btn {
+  border: none;
+  border-radius: 10px;
+  width: 100%;
+}
+
+/* ── Hover Info Panel ── */
+.hover-info-panel {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-20px);
+  z-index: 55;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 22px 10px 16px;
+  background: rgba(12, 12, 22, 0.8);
+  border: 1px solid rgba(124, 92, 252, 0.25);
+  border-radius: 14px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(124, 92, 252, 0.08) inset,
+    0 1px 0 rgba(255, 255, 255, 0.04) inset;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.hover-info-panel.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+}
+
+.hover-info-icon {
+  font-size: 18px;
+  filter: drop-shadow(0 0 6px rgba(124, 92, 252, 0.5));
+  animation: hoverIconPulse 2s ease-in-out infinite;
+}
+
+@keyframes hoverIconPulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.15);
+  }
+}
+
+.hover-info-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.hover-info-label {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.hover-info-name {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  background: linear-gradient(135deg, var(--accent-glow), #c4b5fd, var(--accent-primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% 200%;
+  animation: nameShimmer 3s ease-in-out infinite;
+}
+
+@keyframes nameShimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* ── Cursor Label (simple white + black outline) ── */
+.cursor-label {
+  position: fixed;
+  z-index: 200;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  transform: translate(0, -100%);
+  animation: cursorLabelPop 0.15s ease-out;
+}
+
+@keyframes cursorLabelPop {
+  from {
+    opacity: 0;
+    transform: translate(0, -100%) scale(0.7);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(0, -100%) scale(1);
+  }
+}
+
+.cursor-label-text {
+  display: inline-block;
+  padding: 4px 12px;
+  color: #ffffff;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  -webkit-text-stroke: 1.5px #000000;
+  paint-order: stroke fill;
+  text-shadow:
+    -2px -2px 0 #000,
+    2px -2px 0 #000,
+    -2px 2px 0 #000,
+    2px 2px 0 #000,
+    0 0 6px rgba(0, 0, 0, 0.5);
+}
+
+/* Hide spike decorations */
+.cursor-label-spike {
+  display: none;
+}
+
+/* ── Sound Toggle (top right, simple white) ── */
+.sound-toggle {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 60;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  transition: opacity 0.2s ease;
+  animation: fadeIn 0.5s ease-out 0.6s both;
+}
+
+.sound-toggle:hover {
+  opacity: 0.8;
+}
+
+.sound-toggle:active {
+  transform: scale(0.92);
+}
+
+.sound-toggle-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.sound-toggle.on {
+  color: #ffffff;
+}
+
+.sound-toggle.off {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.sound-toggle.off:hover {
+  color: rgba(255, 255, 255, 0.7);
+}
+

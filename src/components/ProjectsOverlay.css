@@ -1,0 +1,186 @@
+/* ── Projects Overlay Styles ── */
+.projects-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Transparent container with 40% gap from top */
+.projects-container {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, 0);
+  width: 85vw;
+  max-width: 1200px;
+  height: calc(60vh - 40px);
+  background: rgba(12, 12, 22, 0.4);
+  border: 1px solid rgba(124, 92, 252, 0.2);
+  border-radius: 20px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  padding: 24px;
+  pointer-events: auto;
+  animation: projectsContainerFadeIn 0.8s ease-out;
+  overflow: hidden;
+  position: relative;
+}
+
+@keyframes projectsContainerFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+/* Horizontal scrollable cards */
+.projects-scroll {
+  display: flex;
+  gap: 20px;
+  height: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 8px;
+  scroll-behavior: smooth;
+  
+  /* Fade effect on edges */
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 5%,
+    black 95%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 5%,
+    black 95%,
+    transparent 100%
+  );
+}
+
+.projects-scroll::-webkit-scrollbar {
+  height: 8px;
+}
+
+.projects-scroll::-webkit-scrollbar-track {
+  background: rgba(124, 92, 252, 0.1);
+  border-radius: 4px;
+}
+
+.projects-scroll::-webkit-scrollbar-thumb {
+  background: rgba(124, 92, 252, 0.4);
+  border-radius: 4px;
+}
+
+.projects-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(124, 92, 252, 0.6);
+}
+
+/* Project card */
+.project-card {
+  flex: 0 0 320px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  background: rgba(15, 15, 25, 0.8);
+  border: 1px solid rgba(124, 92, 252, 0.25);
+  border-radius: 16px;
+  text-decoration: none;
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+  animation: projectCardFadeIn 0.6s ease-out both;
+  cursor: pointer;
+}
+
+@keyframes projectCardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.project-card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(124, 92, 252, 0.5);
+  box-shadow: 0 12px 40px rgba(124, 92, 252, 0.3);
+  background: rgba(15, 15, 25, 0.95);
+}
+
+.project-card-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.project-icon {
+  font-size: 24px;
+  filter: drop-shadow(0 0 8px rgba(124, 92, 252, 0.5));
+}
+
+.project-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  word-break: break-word;
+}
+
+.project-desc {
+  flex: 1;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.project-card-bottom {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(124, 92, 252, 0.15);
+  font-size: 12px;
+}
+
+.project-lang {
+  padding: 4px 10px;
+  background: rgba(124, 92, 252, 0.2);
+  border-radius: 6px;
+  color: var(--accent-glow);
+  font-weight: 600;
+}
+
+.project-website {
+  color: var(--text-muted);
+  font-size: 11px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 150px;
+}
+
+.project-arrow {
+  margin-left: auto;
+  font-size: 18px;
+  color: var(--accent-primary);
+  transition: transform 0.3s ease;
+}
+
+.project-card:hover .project-arrow {
+  transform: translateX(4px);
+}
